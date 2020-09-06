@@ -3,10 +3,13 @@
 #include <iostream>
 #include <string>
 #include <stdlib.h>
+#include <vector>
+#include <algorithm>
 
 
-std::string ticTac[] = {"1", "2", "3", "4", "5", "6", "7", "8", "9"}; //Decides wether it should be an X, O or an number at the different positions on the board
-int colorCode[] = {37, 37, 37, 37, 37, 37, 37, 37, 37}; //Decides the color of each
+std::string ticTac[9] = {"1", "2", "3", "4", "5", "6", "7", "8", "9"}; //Decides wether it should be an X, O or an number at the different positions on the board
+int colorCode[9] = {37, 37, 37, 37, 37, 37, 37, 37, 37}; //Decides the color of each tictac
+
 int chosenNumber;
 
 int playerTurn; //Player one's turn = 0, Player Two's turn = 1
@@ -22,12 +25,12 @@ std::string colorText(std::string text, int textColor) {
 
 void drawBoard() 
 {
-    std::cout << colorText("<>-<>-<>-<>-<>-<>-<>-<>-<>-<>\n\n", 97);
+    std::cout << colorText("<>-<>-<>-<>-<>-<>-<>-<>-<>-<>\n\n", 33);
     std::cout << "\t| " + colorText(ticTac[0], colorCode[0]) + " | " + colorText(ticTac[1], colorCode[1]) + " | " + colorText(ticTac[2], colorCode[2]) + " |\n";
     std::cout << "\t| " + colorText(ticTac[3], colorCode[3]) + " | " + colorText(ticTac[4], colorCode[4]) + " | " + colorText(ticTac[5], colorCode[5]) + " |\n";
     std::cout << "\t| " + colorText(ticTac[6], colorCode[6]) + " | " + colorText(ticTac[7], colorCode[7]) + " | " + colorText(ticTac[8], colorCode[8]) + " |\n";
     std::cout << "\n";
-    std::cout << colorText("<>-<>-<>-<>-<>-<>-<>-<>-<>-<>\n\n", 97);
+    std::cout << colorText("<>-<>-<>-<>-<>-<>-<>-<>-<>-<>\n\n", 33);
 }
 
 void winConditions()
@@ -108,44 +111,46 @@ void winConditions()
 
 int main()
 {
+    std::vector<int> previouslyChosenNumbers;
     std::string player1_Name;
     std::string player2_Name;
 
     //Introduction
-    std::cout << "Welcome to Tic-Tac-Toe!\n";
-    std::cout << "Player 1, please enter your name: ";
+    std::cout << colorText("Welcome to ", 97) << colorText("Tic-Tac-Toe", 93) << colorText("!\n", 97) << std::endl;
+    std::cout << colorText("Player 1", 91) << ", please enter your name: ";
     std::getline(std::cin, player1_Name);
-    std::cout << "Great! Player 2, please enter your name: ";
+    std::cout << "\n" << colorText("Player 2", 91) << ", please enter your name: ";
     std::getline(std::cin, player2_Name);
 
+    start: //Starting point when the game restarts
     system("cls");
 
-
-    //Decide which player that starts
+    //Randomly decides which player that starts
     playerTurn = rand() % 1;
 
     //Gameplay
-    while(!gameEnded)
+    while(!gameEnded && previouslyChosenNumbers.size() < 9)
     {
         drawBoard();
         
         if (playerTurn == 0) //Player 1
         {
-            std::cout << colorText(player1_Name, 91) << ", it's your turn!\n";
+            std::cout << colorText(player1_Name, 91) << ", it's your turn!\n\n";
             std::cout << "Enter the number of where you'd like to place an " << colorText("X", 93) << ": ";
             std::cin >> chosenNumber;
 
-            while (std::cin.fail() || chosenNumber <= 0 || chosenNumber > 9) //ADD Already chosen numbers
+            while (std::cin.fail() || chosenNumber <= 0 || chosenNumber > 9 || std::count(previouslyChosenNumbers.begin(), previouslyChosenNumbers.end(), chosenNumber) == true)
             {
                 std::cin.clear();
                 std::cin.ignore(32767, '\n');
                 std::cout << "Error, please type a number between 1 and 9, that hasn't yet been taken: ";
                 std::cin >> chosenNumber;
             }
-            --chosenNumber;
-
             std::cin.clear();
             std::cin.ignore(32767, '\n');
+
+            previouslyChosenNumbers.emplace_back(chosenNumber);
+            --chosenNumber;
             ticTac[chosenNumber] = "X";
             colorCode[chosenNumber] = 97;
 
@@ -153,17 +158,21 @@ int main()
         }
         else if (playerTurn == 1) //Player 2
         {
-            std::cout << colorText(player2_Name, 91) << ", it's your turn!\n";
+            std::cout << colorText(player2_Name, 91) << ", it's your turn!\n\n";
             std::cout << "Enter the number of where you'd like to place an " << colorText("O", 93) << ": ";
             std::cin >> chosenNumber;
 
-            while (std::cin.fail() || chosenNumber <= 0 || chosenNumber > 9) //Reminder: Add already chosen numbers...................
+            while (std::cin.fail() || chosenNumber <= 0 || chosenNumber > 9 || std::count(previouslyChosenNumbers.begin(), previouslyChosenNumbers.end(), chosenNumber) == true) 
             {
                 std::cin.clear();
                 std::cin.ignore(32767, '\n');
                 std::cout << "Error, please type a number between 1 and 9, that hasn't yet been taken: ";
                 std::cin >> chosenNumber;
             }
+            std::cin.clear();
+            std::cin.ignore(32767, '\n');
+
+            previouslyChosenNumbers.emplace_back(chosenNumber);
             --chosenNumber;
             ticTac[chosenNumber] = "O";
             colorCode[chosenNumber] = 97;
@@ -176,18 +185,57 @@ int main()
         system("cls");
     }
 
-    //Victory
-    system("cls");
-    drawBoard();
-
-    //NB: playerTurn is flipped for this part
-    if (playerTurn == 1) 
+    //Tie
+    if (previouslyChosenNumbers.size() >= 9 && !gameEnded) 
     {
-        std::cout << colorText("Congratulations ", 92) << player1_Name << colorText("! You Win!", 92) << std::endl;
+        system("cls");
+        drawBoard();
+        std::cout << colorText("It's a tie!\n", 93);
     }
-    else {
-        std::cout << colorText("Congratulations ", 92) << player2_Name << colorText("! You Win!", 92) << std::endl;
+    else //Victory
+    {
+        system("cls");
+        drawBoard();
+
+        //NB: playerTurn is flipped for this part
+        if (playerTurn == 1)
+        {
+            std::cout << colorText("Congratulations ", 92) << player1_Name << colorText("! You Win!", 92) << std::endl;
+        }
+        else {
+            std::cout << colorText("Congratulations ", 92) << player2_Name << colorText("! You Win!", 92) << std::endl;
+        }
     }
 
-    return 0;
+    //Ask the player to Restart or Quit
+    char playerInput;
+    std::cout << "\nType 'R' to restart or '0' to quit: ";
+    std::cin >> playerInput;
+
+    while (std::cin.fail() || playerInput != 'r' && playerInput != 'R' && playerInput != '0')
+    {
+        std::cin.clear();
+        std::cin.ignore(32767, '\n');
+        std::cout << "Type 'R' to restart or '0' to quit: ";
+        std::cin >> playerInput;
+    }
+
+    //Restart
+    if(playerInput == 'r' || playerInput == 'R')
+    {
+        previouslyChosenNumbers.clear();
+        for(int i = 0; i < 9; i++)
+        {
+            colorCode[i] = 37;
+            ticTac[i] = std::to_string(i + 1);
+        }
+        gameEnded = false;
+
+        goto start;
+    }
+    //Quit
+    else
+    {
+        exit(0);
+    }
 }
