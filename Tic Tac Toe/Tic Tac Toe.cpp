@@ -209,6 +209,7 @@ void drawBoard()
 
 void winConditions()
 {
+    //If one of the players won, the Win color is green. If the AI wins, the color is red 
     int color;
     if (playerTurn == 0 && playerAmount == 1) 
     {
@@ -281,7 +282,7 @@ int main()
     {
         std::cin.clear();
         std::cin.ignore(32767, '\n');
-        std::cout << "Choose the amount of players ('1' or '2'): ";
+        std::cout << "Choose the amount of players ('" << colorText("1", 97) << "' or '" << colorText("2", 97) << "'): ";
         std::cin >> playerAmount;
     }
 
@@ -313,12 +314,18 @@ int main()
             difficultyAI = 1;
         }
 
+        std::cin.clear();
+        std::cin.ignore(32767, '\n');
+
         //Ask for the player name
         std::cout << colorText("Player 1", 91) << ", please enter your name: ";
         std::getline(std::cin, player1_Name);
     }
     else if(playerAmount == 2)
     {
+        std::cin.clear();
+        std::cin.ignore(32767, '\n');
+
         std::cout << colorText("Player 1", 91) << ", please enter your name: ";
         std::getline(std::cin, player1_Name);
         std::cout << "\n" << colorText("Player 2", 91) << ", please enter your name: ";
